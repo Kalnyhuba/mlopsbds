@@ -11,3 +11,4 @@ folium
 scikit-learn
 plotly
 python-dotenv
+nbconvert
