@@ -1,0 +1,13 @@
+hopsworks
+pandas
+numpy
+yfinance
+xgboost
+datetime
+joblib
+streamlit
+streamlit_folium
+folium
+scikit-learn
+plotly
+python-dotenv
