@@ -26,5 +26,5 @@ jobs:
       
       - name: execute python workflows from bash script
         env: 
-          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_FS_API_KEY }}
-        run: ./run_pipelines.sh
+          HOPSWORKS_FS_API_KEY: ${{ secrets.HOPSWORKS_FS_API_KEY }}
+        run: run_pipelines.sh
