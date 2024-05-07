@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   
   schedule:
-   - cron: '0 10 * * *'
+   - cron: '0 6 * * *'
 
 jobs:
   test_schedule:
@@ -26,5 +26,5 @@ jobs:
       
       - name: execute python workflows from bash script
         env: 
-          HOPSWORKS_FS_API_KEY: ${{ secrets.HOPSWORKS_FS_API_KEY }}
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_FS_API_KEY }}
         run: ./scripts/run_pipelines.sh
