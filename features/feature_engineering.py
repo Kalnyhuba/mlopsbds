@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-from datetime import datetime, date, timedelta
+from datetime import datetime
 
 def process_bitcoin_data(start, end) -> pd.DataFrame:
     symbol = 'BTC-USD'
@@ -22,7 +22,6 @@ def process_bitcoin_data(start, end) -> pd.DataFrame:
 
     #df.dropna(inplace=True)
 
-    # Pivot DataFrame
     btc = df.pivot_table(index=['timestamp', 'date'], columns=None, values=None).reset_index()
     btc = btc[['timestamp', 'date', 'open', 'high', 'low', 'volume', 'close', 'tomorrow']]
 

@@ -1,0 +1,52 @@
+
+
+Feature engineering part:
+
+What the Volume column represents:
+
+Trading Volume: The volume column represents the total number of Bitcoin units traded during a specific time period.
+For example, if the volume for a particular day is 100,000, it means that a total of 100,000 Bitcoin units were traded on that day.
+Market Activity: The volume can provide insights into the level of market activity or liquidity for Bitcoin.
+Higher volumes generally indicate higher market participation and liquidity, while lower volumes may suggest lower activity or liquidity.
+Price Movements: Changes in trading volume can often precede or accompany significant price movements in Bitcoin.
+For example, a sudden increase in volume may indicate strong buying or selling pressure, potentially leading to price volatility.
+Confirmation Indicator: Volume can act as a confirmation indicator for price trends.
+For example, if Bitcoin prices are rising accompanied by increasing volume, it may indicate a stronger bullish trend.
+Conversely, if prices are falling with high volume, it may indicate a stronger bearish trend.
+
+Moving Averages:
+
+Moving averages are statistical calculations used to analyze data points by creating a series of averages of different subsets of the full dataset.
+They are commonly used in technical analysis to smooth out short-term fluctuations and highlight longer-term trends or cycles in the data.
+There are different types of moving averages, but the two most common ones are:
+Simple Moving Average (SMA): It calculates the average of a given set of prices over a specified period, equally weighting each price.
+Exponential Moving Average (EMA): It gives more weight to recent prices, making it more responsive to recent price changes compared to the SMA.
+Moving averages help traders and analysts identify trends, reversals, and potential entry or exit points in financial markets.
+
+Lag Features:
+
+Lag features are created by shifting a feature or variable in time, effectively creating a lagged version of that feature.
+In the context of time series data like stock prices, lag features represent historical values of a variable at different time points in the past.
+By incorporating lag features into predictive models, you allow the model to learn from past observations and capture temporal dependencies in the data.
+Lag features can help capture patterns such as seasonality, trends, and autocorrelation, which are important for time series forecasting tasks.
+Commonly used lag features include lagged values of the target variable (e.g., lagged closing prices in predicting future prices) or lagged values of other relevant features.
+
+In the code, the moving averages (both SMA and EMA) are computed based on the closing prices of Bitcoin.
+These moving averages help smooth out short-term fluctuations in the price data and provide insights into longer-term trends.
+
+Additionally, lag features are created by shifting the closing price of Bitcoin by different time periods (1, 3, and 7 days).
+These lagged values allow the model to learn from past price movements and capture temporal dependencies that may be useful for predicting future prices.
+
+
+
+Converting the date to Unix timestamp, because Hopsworks can not handle date type as it is:
+
+Hopsworks Feature Store might not support the date data type as the event time column when online_enabled is set to True due to limitations in the online serving infrastructure.
+
+In a real-time serving environment, data is typically stored in a format that allows for efficient indexing and querying to serve requests with low latency.
+While datetime data types are commonly used for event time columns in batch processing or offline analysis,
+they might not be supported for real-time serving due to indexing and performance considerations.
+
+To address this issue, you can convert the date column to a data type that is supported for online serving,
+such as a numeric timestamp (e.g., Unix timestamp) or a string representation of the date in a format that can be efficiently indexed (e.g., ISO 8601 format).
+Once the column is converted to a supported data type, you should be able to set online_enabled to True without encountering errors.
