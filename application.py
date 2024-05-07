@@ -4,7 +4,6 @@ import hopsworks
 import joblib
 import os
 from dotenv import load_dotenv
-from features import feature_engineering
 
 # Function to style headers
 def print_fancy_header(text, font_weight="bold", font_size="22px", color="#FFD700"):
