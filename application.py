@@ -86,13 +86,11 @@ with st.expander("**Objective**"):
 with st.sidebar:
     st.image('images/bitcoin.jpg', use_column_width=True)
     print_fancy_header('Connecting to Hopsworks Feature Store and retrieving project')
-    st.write("Logging in... ")
     load_dotenv()
     api_key = os.getenv('HOPSWORKS_FS_API_KEY')
     project = hopsworks.login(project="mlopsbds", api_key_value=api_key)
     fs = project.get_feature_store()
     progress_bar.progress(40)
-    st.write("Logged in successfully!")
     st.write('All data retrieved!')
     st.markdown('<style>div[role="listbox"] div div div:nth-child(1) {color: #FFD700;}</style>', unsafe_allow_html=True)
 
