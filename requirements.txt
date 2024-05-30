@@ -12,3 +12,7 @@ scikit-learn
 plotly
 python-dotenv
 nbconvert
+newsapi-python
+spacy
+nltk
+seaborn

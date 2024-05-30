@@ -1,109 +1,169 @@
 import streamlit as st
 import pandas as pd
-import hopsworks 
-import joblib
 import os
-from dotenv import load_dotenv
+import hopsworks
+import matplotlib.pyplot as plt
 
-# Function to style headers
-def print_fancy_header(text, font_weight="bold", font_size="22px", color="#FFD700"):
-    st.markdown(
-        f'<h2 style="font-weight:{font_weight}; color:{color}; font-size:{font_size};">'
-        f'{text}</h2>',
-        unsafe_allow_html=True
-    )
+# Define constants
+INPUT_FOLDER = 'prediction_dataframes'
 
-# Function to style subheaders
-def print_fancy_subheader(text, font_weight="bold", font_size="18px", color="#FFD700"):
-    st.markdown(
-        f'<h3 style="font-weight:{font_weight}; color:{color}; font-size:{font_size};">'
-        f'{text}</h3>',
-        unsafe_allow_html=True
-    )
+@st.cache_data
+def load_csv_data(filename):
+    """
+    Load data from a CSV file and cache the result to avoid reloading the file on every rerun.
+    """
+    file_path = os.path.join(INPUT_FOLDER, filename)
+    return pd.read_csv(file_path)
 
-@st.cache_data 
-def load_data():
+@st.cache_data
+def load_hopsworks_data():
+    """
+    Load data from Hopsworks and cache the result.
+    """
     project = hopsworks.login()
     fs = project.get_feature_store()
-    mr = project.get_model_registry()
-
-    feature_view = fs.get_feature_view(name='bitcoin_training_fv', version=1)
-    model = mr.get_model(name="bitcoin_price_prediction_model", version=1)
-    saved_model_dir = model.download()
-    xgboost_model = joblib.load(saved_model_dir + "/bitcoin_price_prediction_model.pkl")
-
-    bitcoin_fg = fs.get_feature_group(name='bitcoin_price', version=2)
+    bitcoin_fg = fs.get_feature_group(name='bitcoin_analysis', version=1)
     data = bitcoin_fg.select_all()
-    version = 1 
-    feature_view = fs.get_or_create_feature_view(name='bitcoin_training_fv', version=version, query=data)
+    feature_view = fs.get_or_create_feature_view(
+        name='bitcoin_analysis_training_fv', 
+        version=1, 
+        query=data
+    )
     df = feature_view.get_batch_data()
-    sorted_df = df.sort_values(by='timestamp')
+    sorted_df = df.sort_values(by='id')
+    sorted_df['date'] = pd.to_datetime(sorted_df['date'])
+    sorted_df['year'] = sorted_df['date'].dt.year
+    sorted_df['month'] = sorted_df['date'].dt.month
+    sorted_df['day'] = sorted_df['date'].dt.day
+    sorted_df['day_of_week'] = sorted_df['date'].dt.dayofweek
     
-    st.write("New data:")
-    last_row = sorted_df.tail(1)
-    st.dataframe(last_row)            
+    return sorted_df
 
-    X = sorted_df.drop(columns=['timestamp', 'date', 'tomorrow'])
+def calculate_investment_value(investment_amount, initial_price, final_price):
+    """
+    Calculate the investment value based on initial and final prices.
+    """
+    return (investment_amount / initial_price) * final_price
 
-    day_to_predict = X.tail(1).iloc[0]
-    day_to_predict_reshaped = day_to_predict.values.reshape(1, -1)
-    pred = xgboost_model.predict(day_to_predict_reshaped)
+def plot_visualization(option, df):
+    if option == 'Bitcoin Price and USD Index':
+        fig, ax1 = plt.subplots(figsize=(14, 7))
 
-    prediction_df = pd.DataFrame({'Date of last available closing price': sorted_df['date'].iloc[-1], 'Predicted value for the next day': pred})
+        color = 'tab:blue'
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Bitcoin Price', color=color)
+        ax1.plot(df['date'], df['close'], color=color)
+        ax1.tick_params(axis='y', labelcolor=color)
 
-    return prediction_df
+        ax2 = ax1.twinx()
+        color = 'tab:red'
+        ax2.set_ylabel('USD Index', color=color)
+        ax2.plot(df['date'], df['close_usd_index'], color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
 
-# Sidebar header
-progress_bar = st.sidebar.header('Loading')
+        fig.tight_layout()
+        plt.title('Bitcoin Price and USD Index Over Time')
+        st.pyplot(fig)
+    
+    elif option == 'Bitcoin Price, Oil Price, and Gold Price':
+        fig, ax1 = plt.subplots(figsize=(14, 7))
 
-# Title
-st.title('Bitcoin Price Prediction')
-st.markdown('<style>h1 {color: #FFD700;}</style>', unsafe_allow_html=True)
+        color = 'tab:blue'
+        ax1.set_xlabel('Date')
+        ax1.set_ylabel('Bitcoin Price', color=color)
+        ax1.plot(df['date'], df['close'], color=color, label='Bitcoin Price')
+        ax1.tick_params(axis='y', labelcolor=color)
 
-# Description
-st.markdown("""
-    Trying to predict tomorrow's closing Bitcoin price using XGBoost Regressor model.
-""")
+        ax2 = ax1.twinx()
+        color = 'tab:green'
+        ax2.set_ylabel('Oil Price', color=color)
+        ax2.plot(df['date'], df['close_oil'], color=color, label='Oil Price')
+        ax2.tick_params(axis='y', labelcolor=color)
 
-# Data Engineering and Machine Learning Operations in Business expander
-with st.expander("**Data Engineering and Machine Learning Operations in Business**"):
-    st.markdown("""
-        LEARNING OBJECTIVES
-        - Planning, managing, and executing complex end-to-end data science projects.
-        - Identifying possibilities to deploy machine learning models to real-time and client-facing applications.
-        - Evaluating data and machine learning projects, structures, and workflows in organizations.
+        ax3 = ax1.twinx()
+        color = 'tab:orange'
+        ax3.spines["right"].set_position(("outward", 60))  # Offset the third axis
+        ax3.set_ylabel('Gold Price', color=color)
+        ax3.plot(df['date'], df['close_gold'], color=color, label='Gold Price')
+        ax3.tick_params(axis='y', labelcolor=color)
+
+        lines_1, labels_1 = ax1.get_legend_handles_labels()
+        lines_2, labels_2 = ax2.get_legend_handles_labels()
+        lines_3, labels_3 = ax3.get_legend_handles_labels()
+        lines = lines_1 + lines_2 + lines_3
+        labels = labels_1 + labels_2 + labels_3
+        ax1.legend(lines, labels, loc='upper left')
+
+        fig.tight_layout()
+        plt.title('Bitcoin Price, Oil Price, and Gold Price Over Time')
+        st.pyplot(fig)
+
+    elif option == 'Boxplot of Bitcoin Closing Prices by Year':
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        # Extract the year from the date column
+        df['year'] = pd.to_datetime(df['date']).dt.year
+
+        # Prepare the data for the boxplot
+        data_by_year = [group['close'].values for name, group in df.groupby('year')]
+
+        # Plot the boxplots for each year's closing prices
+        ax.boxplot(data_by_year, labels=df['year'].unique())
+        ax.set_title('Boxplot of Bitcoin Closing Prices by Year')
+        ax.set_xlabel('Year')
+        ax.set_ylabel('Closing Price (USD)')
+        ax.set_xticklabels(df['year'].unique(), rotation=45)
+        ax.grid(True)
+
+        st.pyplot(fig)
+
+def main():
+    st.title('Bitcoin Price Prediction')
+
+    st.write("""
+        Welcome to our Bitcoin Price Prediction application. 
+        Here, you can explore various forecasts and visualizations related to Bitcoin prices. 
+        Use the investment calculator to predict the future value of your investments based on the provided data.
     """)
-    st.markdown('<style>div[role="listbox"] div div div:nth-child(1) {color: #FFD700;}</style>', unsafe_allow_html=True)
 
-# Objective expander
-with st.expander("**Objective**"):
-    st.markdown("""
-        The objective of this assignment is to build a prediction system that predicts the price of Bitcoin using historical prices and time-series analysis.
-    """)
-    st.markdown('<style>div[role="listbox"] div div div:nth-child(1) {color: #FFD700;}</style>', unsafe_allow_html=True)
+    # Load data from Hopsworks
+    sorted_df = load_hopsworks_data()
 
-# Sidebar content
-with st.sidebar:
-    st.image('images/bitcoin.jpg', use_column_width=True)
-    print_fancy_header('Connecting to Hopsworks Feature Store and retrieving project')
-    load_dotenv()
-    api_key = os.getenv('HOPSWORKS_FS_API_KEY')
-    project = hopsworks.login(project="mlopsbds", api_key_value=api_key)
-    fs = project.get_feature_store()
-    progress_bar.progress(40)
-    st.write('All data retrieved!')
-    st.markdown('<style>div[role="listbox"] div div div:nth-child(1) {color: #FFD700;}</style>', unsafe_allow_html=True)
+    # Load CSV data
+    forecast_df = load_csv_data('forecast_7_days.csv')
+    investment_forecast_df = load_csv_data('forecast_30_days.csv')
 
-# Main content
-st.write("---")
-print_fancy_header('Retrieving the newest available data from Feature Store...')
-st.markdown('<style>h2 {color: #FFD700;}</style>', unsafe_allow_html=True)
+    # Display 7-day forecast
+    st.header('7-Day Forecast')
+    st.write(forecast_df)
 
-# Load data
-predictions_df = load_data()
+    # Investment Calculator
+    st.write('### Investment Calculator')
+    investment_amount = st.number_input(
+        'Enter amount in USD to invest:', 
+        min_value=0.0, 
+        value=1000.0, 
+        step=100.0
+    )
+    initial_price = sorted_df['close'].iloc[-1]
+    final_price = investment_forecast_df['predicted_close'].iloc[-1]
 
-# Progress bar completion
-progress_bar.progress(100)
+    investment_value = calculate_investment_value(investment_amount, initial_price, final_price)
+    st.write(f'If you invest  ${investment_amount:.2f}  in Bitcoin today, it will be worth  ${investment_value:.2f}  one month from now.')
 
-# Display prediction dataframe
-st.write(predictions_df)
+    # Visualization options
+    st.header('Visualizations')
+    visualization_option = st.selectbox(
+        'Choose a visualization:',
+        ('Bitcoin Price and USD Index', 
+         'Bitcoin Price, Oil Price, and Gold Price', 
+         'Boxplot of Bitcoin Closing Prices by Year')
+    )
+    plot_visualization(visualization_option, sorted_df)
+
+    # Display 30-day forecast
+    st.header('30-Day Investment Forecast')
+    st.write(investment_forecast_df)
+
+if __name__ == "__main__":
+    main()
