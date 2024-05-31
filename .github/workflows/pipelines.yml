@@ -28,3 +28,16 @@ jobs:
         env: 
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_FS_API_KEY }}
         run: ./scripts/run_pipelines.sh
+
+      - name: Configure git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Commit and push changes
+        run: |
+          git add prediction_dataframes/*.csv
+          git commit -m "Update prediction dataframes"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
