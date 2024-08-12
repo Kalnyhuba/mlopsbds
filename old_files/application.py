@@ -149,7 +149,7 @@ def main():
     final_price = investment_forecast_df['predicted_close'].iloc[-1]
 
     investment_value = calculate_investment_value(investment_amount, initial_price, final_price)
-    st.write(f'If you invest  ${investment_amount:.2f}  in Bitcoin today, it will be worth  ${investment_value:.2f}  one month from now.')
+    st.write(f"If you invest ${investment_amount:.2f} in Bitcoin today, it will be worth ${investment_value:.2f} one month from now.")
 
     # Visualization options
     st.header('Visualizations')
