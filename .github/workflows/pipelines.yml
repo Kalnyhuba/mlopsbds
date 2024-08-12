@@ -5,12 +5,21 @@ on:
   workflow_dispatch:
   
   schedule:
-   - cron: '0 6 * * 3'
+   - cron: '0 8 */2 * *'
 
 jobs:
   test_schedule:
     runs-on: ubuntu-latest
     steps:
+      - name: date checkout
+        id: date-check
+        run: |
+          current_date=$(date -u +"%Y-%m-%d")
+          target_date="2024-08-14"
+          if [[ "$current_date" < "$target_date" ]]; then
+            echo "Not time to run yet."
+            exit 0
+          fi
       - name: checkout repo content
         uses: actions/checkout@v2
 
