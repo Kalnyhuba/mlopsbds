@@ -2,9 +2,9 @@ hopsworks
 pandas
 numpy
 yfinance
-xgboost
 datetime
-joblib
+torch
+base64
 streamlit
 streamlit_folium
 folium
@@ -12,7 +12,3 @@ scikit-learn
 plotly
 python-dotenv
 nbconvert
-newsapi-python
-spacy
-nltk
-seaborn
