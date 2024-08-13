@@ -4,7 +4,6 @@ numpy
 yfinance
 datetime
 torch
-base64
 streamlit
 streamlit_folium
 folium

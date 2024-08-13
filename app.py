@@ -8,7 +8,6 @@ import hopsworks
 import matplotlib.pyplot as plt
 import yfinance as yf
 from datetime import datetime, timedelta, date
-import base64
 
 def prepare_data_for_forecast(df):
     sorted_df = df.sort_values(by='id')
@@ -209,23 +208,6 @@ def get_today_bitcoin_price():
 
 def get_bitcoin_price_selected_dates(start_date, end_date):
     return yf.download('BTC-USD', start=start_date, end=end_date)['Close'].values[0]
-
-def set_background(image_file):
-    with open(image_file, "rb") as image:
-        encoded_string = base64.b64encode(image.read()).decode()
-    st.markdown(
-         f"""
-         <style>
-         .stApp {{
-             background-image: url(data:image/jpg;base64,{encoded_string});
-             background-size: cover;
-             background-position: center;
-             background-repeat: no-repeat;
-         }}
-         </style>
-         """,
-         unsafe_allow_html=True
-     )
     
 def main():
     #set_background('images/background.jpg')
