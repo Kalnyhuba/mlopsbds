@@ -57,6 +57,7 @@ def prepare_data_for_forecast(df):
 
     return all_data
 
+
 def forecast(model, data, sequence_length, steps_ahead):
     model.eval()
 
@@ -225,8 +226,7 @@ def set_background(image_file):
          """,
          unsafe_allow_html=True
      )
-
-
+    
 def main():
     #set_background('images/background.jpg')
 
@@ -238,14 +238,11 @@ def main():
         our interactive app and make informed decisions in the fast-paced world of cryptocurrency. 
     """)
 
-    # Load data from Hopsworks
-    sorted_df = load_hopsworks_data()
-
-    # TODO: Load data by downloading it instead of hopsworks later
-    #  on change it to hopsworks again which is the commented line above
-    #data = load_local_data_for_forecast()
     lstm_model = load_model()
 
+    # Load data from Hopsworks
+    sorted_df= load_hopsworks_data()
+    
     movement_interpretation = forecast(lstm_model, sorted_df, 100, 2)
 
     st.header('Bitcoin portfolio calculator')
@@ -253,7 +250,6 @@ def main():
     # Create a calendar selector
     selected_date = st.date_input("Select a date", value=None, min_value=datetime(2014, 10, 1), max_value=date.today())
     if selected_date:
-        btc_owned = st.number_input('Enter the amount of Bitcoin you own', min_value=0.0, step=0.01)
         selected_date = selected_date
         following_day_date = selected_date + timedelta(days=1)
         btc_price_selected_date = get_bitcoin_price_selected_dates(selected_date.strftime('%Y-%m-%d'), following_day_date.strftime('%Y-%m-%d'))
@@ -262,6 +258,8 @@ def main():
         # Display the selected date
         st.write("The price of the bitcoin at your selected date is: ", btc_price_selected_date)
         st.write("The price of the bitcoin today is: ", btc_price_today)
+
+        btc_owned = st.number_input('Enter the amount of Bitcoin you own', min_value=0.0, step=0.01)
 
         if btc_owned > 0:
             # Calculate the value of the investment on the selected date and today
@@ -289,19 +287,19 @@ def main():
                 day_1_prediction = movement_interpretation[0]
                 day_2_prediction = movement_interpretation[1]
 
-                day_1_emoji = "📈" if day_1_prediction == "increase" else "📉"
-                day_2_emoji = "📈" if day_2_prediction == "increase" else "📉"
+                day_1_emoji = "📈" if day_1_prediction == "Increase" else "📉"
+                day_2_emoji = "📈" if day_2_prediction == "Increase" else "📉"
 
                 st.write(f"Day 1 Prediction: {day_1_prediction.capitalize()} {day_1_emoji}")
                 st.write(f"Day 2 Prediction: {day_2_prediction.capitalize()} {day_2_emoji}")
 
                 # Suggestion based on prediction and current gain/loss
-                if movement_interpretation[0] == "increase" or movement_interpretation[1] == "increase":
+                if movement_interpretation[0] == "Increase" or movement_interpretation[1] == "Increase":
                     if gain_loss > 0:
                         suggestion = "sell"
                     else:
                         suggestion = "hold"
-                elif movement_interpretation[0] == "decrease" and movement_interpretation[1] == "decrease":
+                elif movement_interpretation[0] == "Decrease" and movement_interpretation[1] == "Decrease":
                     suggestion = "buy"
                 else:
                     suggestion = "hold"
