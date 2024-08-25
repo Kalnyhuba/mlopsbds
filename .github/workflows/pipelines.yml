@@ -45,8 +45,8 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git add prediction_dataframes/*.csv
-          git commit -m "Update prediction dataframes"
+          git add feature_pipeline.nbconvert.ipynb predictions_pipeline.nbconvert.ipynb
+          git commit -m "Updates"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
