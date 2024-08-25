@@ -89,7 +89,8 @@ def load_hopsworks_data():
     """
     Load data from Hopsworks and cache the result.
     """
-    project = hopsworks.login()
+    api_key = st.secrets["HOPSWORKS_FS_API_KEY"]
+    project = hopsworks.login(api_key_value=api_key)
     fs = project.get_feature_store()
     bitcoin_fg = fs.get_feature_group(name='bitcoin_price_movement', version=2)
     data = bitcoin_fg.select_all()
@@ -188,7 +189,8 @@ class LSTMModel(nn.Module):
     
 def load_model():
     # import the model
-    project = hopsworks.login()
+    api_key = st.secrets["HOPSWORKS_FS_API_KEY"]
+    project = hopsworks.login(api_key_value=api_key)
     mr = project.get_model_registry()
     model = mr.get_model(
     name="bitcoin_price_movement_prediction_model_lstm", 
