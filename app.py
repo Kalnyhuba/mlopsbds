@@ -100,8 +100,9 @@ def load_hopsworks_data():
         query=data
     )
     df = feature_view.get_batch_data()
+    df = df.sort_values(by='id')
     sorted_df = prepare_data_for_forecast(df)
-    return sorted_df
+    return sorted_df, df
 
 def plot_visualization(option, df):
     if option == 'Bitcoin Price and USD Index':
@@ -225,7 +226,7 @@ def main():
     lstm_model = load_model()
 
     # Load data from Hopsworks
-    sorted_df= load_hopsworks_data()
+    sorted_df, df = load_hopsworks_data()
     
     movement_interpretation = forecast(lstm_model, sorted_df, 100, 2)
 
@@ -280,11 +281,11 @@ def main():
                 # Suggestion based on prediction and current gain/loss
                 if movement_interpretation[0] == "Increase" or movement_interpretation[1] == "Increase":
                     if gain_loss > 0:
-                        suggestion = "sell"
+                        suggestion = "buy"
                     else:
                         suggestion = "hold"
                 elif movement_interpretation[0] == "Decrease" and movement_interpretation[1] == "Decrease":
-                    suggestion = "buy"
+                    suggestion = "sell"
                 else:
                     suggestion = "hold"
 
@@ -304,7 +305,7 @@ def main():
     )
 
     if visualization_option != 'Select an option':
-        plot_visualization(visualization_option, sorted_df)
+        plot_visualization(visualization_option, df)
 
 
 
