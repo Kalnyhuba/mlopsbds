@@ -280,10 +280,7 @@ def main():
 
                 # Suggestion based on prediction and current gain/loss
                 if movement_interpretation[0] == "Increase" or movement_interpretation[1] == "Increase":
-                    if gain_loss > 0:
                         suggestion = "buy"
-                    else:
-                        suggestion = "hold"
                 elif movement_interpretation[0] == "Decrease" and movement_interpretation[1] == "Decrease":
                     suggestion = "sell"
                 else:
